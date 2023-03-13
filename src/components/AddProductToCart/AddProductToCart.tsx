@@ -1,5 +1,5 @@
 import Typography from "@mui/material/Typography";
-import { Product } from "~/models/Product";
+import { AvailableProduct, Product } from "~/models/Product";
 import CartIcon from "@mui/icons-material/ShoppingCart";
 import Add from "@mui/icons-material/Add";
 import Remove from "@mui/icons-material/Remove";
