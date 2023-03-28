@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import { formatAsPrice } from "~/utils/utils";
 import AddProductToCart from "~/components/AddProductToCart/AddProductToCart";
 import { useAvailableProducts } from "~/queries/products";
+import { Link as RouterLink, Link } from "react-router-dom";
 
 export default function Products() {
   const {
@@ -29,9 +30,11 @@ export default function Products() {
   return (
     <Grid container spacing={4}>
       {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-      {data.map(({ count, ...product }, index) => (
+      {data.map((product, index) => (
         <Grid item key={product.id} xs={12} sm={6} md={4}>
           <Card
+            component={RouterLink}
+            to={`product/${product.id}`}
             sx={{ height: "100%", display: "flex", flexDirection: "column" }}
           >
             <CardMedia
@@ -44,6 +47,7 @@ export default function Products() {
                 {product.title}
               </Typography>
               <Typography>{formatAsPrice(product.price)}</Typography>
+              <Typography>{`count: ${product.count}`}</Typography>
             </CardContent>
             <CardActions>
               <AddProductToCart product={product} />
