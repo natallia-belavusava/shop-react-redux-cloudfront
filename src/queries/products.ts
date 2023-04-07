@@ -25,10 +25,12 @@ export function useInvalidateAvailableProducts() {
 }
 
 export function useAvailableProduct(id?: string) {
-  return useQuery<Product, AxiosError>(
+  return useQuery<AvailableProduct, AxiosError>(
     ["product", { id }],
     async () => {
-      const res = await axios.get<Product>(`${API_PATHS.bff}/product/${id}`);
+      const res = await axios.get<AvailableProduct>(
+        `${API_PATHS.bff}/product/${id}`
+      );
       return res.data;
     },
     { enabled: !!id }

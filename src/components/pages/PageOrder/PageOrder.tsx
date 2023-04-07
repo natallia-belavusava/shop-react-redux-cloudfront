@@ -1,12 +1,11 @@
 import React from "react";
-import { Order, OrderItem } from "~/models/Order";
+import { OrderRDS } from "~/models/Order";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import PaperLayout from "~/components/PaperLayout/PaperLayout";
 import Typography from "@mui/material/Typography";
 import API_PATHS from "~/constants/apiPaths";
-import { CartItem } from "~/models/CartItem";
-import { AvailableProduct } from "~/models/Product";
+
 import ReviewOrder from "~/components/pages/PageCart/components/ReviewOrder";
 import { OrderStatus, ORDER_STATUS_FLOW } from "~/constants/order";
 import Button from "@mui/material/Button";
@@ -18,7 +17,6 @@ import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
-import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import Box from "@mui/material/Box";
 import { useQueries } from "react-query";
@@ -35,64 +33,53 @@ export default function PageOrder() {
     {
       queryKey: ["order", { id }],
       queryFn: async () => {
-        const res = await axios.get<Order>(`${API_PATHS.order}/order/${id}`);
-        return res.data;
-      },
-    },
-    {
-      queryKey: "products",
-      queryFn: async () => {
-        const res = await axios.get<AvailableProduct[]>(
-          `${API_PATHS.bff}/product/available`
+        const res = await axios.get<{ data: OrderRDS }>(
+          `${API_PATHS.order}/order/?id=${id}`
         );
-        return res.data;
+
+        return res.data?.data;
       },
     },
   ]);
-  const [
-    { data: order, isLoading: isOrderLoading },
-    { data: products, isLoading: isProductsLoading },
-  ] = results;
+  const [{ data: order, isLoading: isOrderLoading }] = results;
   const { mutateAsync: updateOrderStatus } = useUpdateOrderStatus();
   const invalidateOrder = useInvalidateOrder();
-  const cartItems: CartItem[] = React.useMemo(() => {
-    if (order && products) {
-      return order.items.map((item: OrderItem) => {
-        const product = products.find((p) => p.id === item.productId);
-        if (!product) {
-          throw new Error("Product not found");
-        }
-        return { product, count: item.count };
-      });
-    }
-    return [];
-  }, [order, products]);
 
-  if (isOrderLoading || isProductsLoading) return <p>loading...</p>;
-
-  const statusHistory = order?.statusHistory || [];
-
-  const lastStatusItem = statusHistory[statusHistory.length - 1];
+  if (isOrderLoading) return <p>loading...</p>;
 
   return order ? (
     <PaperLayout>
       <Typography component="h1" variant="h4" align="center">
         Manage order
       </Typography>
-      <ReviewOrder address={order.address} items={cartItems} />
+      <ReviewOrder
+        address={{
+          delivery: order?.delivery,
+          comment: order?.comments,
+          user_id: order?.user_id,
+        }}
+        items={order.items || []}
+      />
       <Typography variant="h6">Status:</Typography>
-      <Typography variant="h6" color="primary">
-        {lastStatusItem?.status.toUpperCase()}
-      </Typography>
+
       <Typography variant="h6">Change status:</Typography>
       <Box py={2}>
         <Formik
-          initialValues={{ status: lastStatusItem.status, comment: "" }}
+          initialValues={{
+            status: (order.status as OrderStatus) || OrderStatus.Open,
+            comment: order.comments || "",
+          }}
           enableReinitialize
           onSubmit={(values) =>
             updateOrderStatus(
-              { id: order.id, ...values },
-              { onSuccess: () => invalidateOrder(order.id) }
+              { id: order.id || "", ...values },
+              {
+                onSuccess: () => {
+                  if (order.id) {
+                    invalidateOrder(order.id);
+                  }
+                },
+              }
             )
           }
         >
@@ -154,19 +141,6 @@ export default function PageOrder() {
               <TableCell align="right">Comment</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
-            {statusHistory.map((statusHistoryItem) => (
-              <TableRow key={order.id}>
-                <TableCell component="th" scope="row">
-                  {statusHistoryItem.status.toUpperCase()}
-                </TableCell>
-                <TableCell align="right">
-                  {new Date(statusHistoryItem.timestamp).toString()}
-                </TableCell>
-                <TableCell align="right">{statusHistoryItem.comment}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
         </Table>
       </TableContainer>
     </PaperLayout>

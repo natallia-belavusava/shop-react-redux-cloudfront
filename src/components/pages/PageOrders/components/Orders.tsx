@@ -23,30 +23,31 @@ export default function Orders() {
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>From</TableCell>
-            <TableCell align="right">Items count</TableCell>
-            <TableCell align="right">Address</TableCell>
+            <TableCell>Id</TableCell>
             <TableCell align="right">Status</TableCell>
-            <TableCell align="right">Action</TableCell>
+            <TableCell align="right">Total</TableCell>
+            <TableCell align="right">Delivery</TableCell>
+            <TableCell align="right">Payment Type</TableCell>
+            <TableCell align="right">Comments</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {data?.map((order) => (
             <TableRow key={order.id}>
               <TableCell component="th" scope="row">
-                {order.address?.firstName} {order.address?.lastName}
+                {order.id}
               </TableCell>
-              <TableCell align="right">{order.items.length}</TableCell>
-              <TableCell align="right">{order.address?.address}</TableCell>
-              <TableCell align="right">
-                {order.statusHistory[order.statusHistory.length - 1].status}
-              </TableCell>
+              <TableCell align="right">{order.status}</TableCell>
+              <TableCell align="right">{order.total}</TableCell>
+              <TableCell align="right">{order.delivery.type}</TableCell>
+              <TableCell align="right">{order.payment.type}</TableCell>
+              <TableCell align="right">{order.comments}</TableCell>
               <TableCell align="right">
                 <Button
                   size="small"
                   color="primary"
                   component={Link}
-                  to={order.id}
+                  to={`${order.id}`}
                 >
                   Manage
                 </Button>
@@ -54,6 +55,7 @@ export default function Orders() {
                   size="small"
                   color="secondary"
                   onClick={() =>
+                    order?.id &&
                     deleteOrder(order.id, { onSuccess: invalidateOrders })
                   }
                 >
