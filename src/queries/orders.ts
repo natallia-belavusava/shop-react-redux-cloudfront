@@ -3,12 +3,14 @@ import React from "react";
 import { useQuery, useQueryClient, useMutation } from "react-query";
 import API_PATHS from "~/constants/apiPaths";
 import { OrderStatus } from "~/constants/order";
-import { Order } from "~/models/Order";
+import { OrderRDS } from "~/models/Order";
 
 export function useOrders() {
-  return useQuery<Order[], AxiosError>("orders", async () => {
-    const res = await axios.get<Order[]>(`${API_PATHS.order}/order`);
-    return res.data;
+  return useQuery<OrderRDS[], AxiosError>("orders", async () => {
+    const res = await axios.get<{ data: OrderRDS[] }>(
+      `${API_PATHS.order}/order`
+    );
+    return res.data?.data;
   });
 }
 
@@ -24,7 +26,7 @@ export function useUpdateOrderStatus() {
   return useMutation(
     (values: { id: string; status: OrderStatus; comment: string }) => {
       const { id, ...data } = values;
-      return axios.put(`${API_PATHS.order}/order/${id}/status`, data, {
+      return axios.put(`${API_PATHS.order}/order?id=${id}`, data, {
         headers: {
           Authorization: `Basic ${localStorage.getItem("authorization_token")}`,
         },
@@ -34,8 +36,8 @@ export function useUpdateOrderStatus() {
 }
 
 export function useSubmitOrder() {
-  return useMutation((values: Omit<Order, "id">) => {
-    return axios.put<Omit<Order, "id">>(`${API_PATHS.order}/order`, values, {
+  return useMutation((values: OrderRDS) => {
+    return axios.post<OrderRDS>(`${API_PATHS.order}/cart/checkout`, values, {
       headers: {
         Authorization: `Basic ${localStorage.getItem("authorization_token")}`,
       },
@@ -54,7 +56,7 @@ export function useInvalidateOrder() {
 
 export function useDeleteOrder() {
   return useMutation((id: string) =>
-    axios.delete(`${API_PATHS.order}/order/${id}`, {
+    axios.delete(`${API_PATHS.order}/order?id=${id}`, {
       headers: {
         Authorization: `Basic ${localStorage.getItem("authorization_token")}`,
       },

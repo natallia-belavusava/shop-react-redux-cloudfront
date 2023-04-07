@@ -1,5 +1,5 @@
 import Typography from "@mui/material/Typography";
-import { AvailableProduct, Product } from "~/models/Product";
+import { Product } from "~/models/Product";
 import CartIcon from "@mui/icons-material/ShoppingCart";
 import Add from "@mui/icons-material/Add";
 import Remove from "@mui/icons-material/Remove";
@@ -11,14 +11,27 @@ type AddProductToCartProps = {
 };
 
 export default function AddProductToCart({ product }: AddProductToCartProps) {
-  const { data = [], isFetching } = useCart();
+  const { data, isFetching } = useCart();
   const { mutate: upsertCart } = useUpsertCart();
   const invalidateCart = useInvalidateCart();
-  const cartItem = data.find((i) => i.product.id === product.id);
+  const cartItem = data?.items?.find((i) => i.product.id === product.id);
 
   const addProduct = () => {
     upsertCart(
-      { product, count: cartItem ? cartItem.count + 1 : 1 },
+      {
+        id: data?.id,
+        items: [
+          {
+            product: {
+              id: product.id,
+              title: product.title,
+              description: product.description,
+              price: product.price,
+            },
+            count: cartItem ? cartItem.count + 1 : 1,
+          },
+        ],
+      },
       { onSuccess: invalidateCart }
     );
   };
@@ -26,13 +39,26 @@ export default function AddProductToCart({ product }: AddProductToCartProps) {
   const removeProduct = () => {
     if (cartItem) {
       upsertCart(
-        { ...cartItem, count: cartItem.count - 1 },
+        {
+          id: data?.id,
+          items: [
+            {
+              product: {
+                id: product.id,
+                title: product.title,
+                description: product.description,
+                price: product.price,
+              },
+              count: cartItem.count - 1,
+            },
+          ],
+        },
         { onSuccess: invalidateCart }
       );
     }
   };
 
-  return cartItem ? (
+  return cartItem && cartItem.count > 0 ? (
     <>
       <IconButton disabled={isFetching} onClick={removeProduct} size="large">
         <Remove color={"secondary"} />

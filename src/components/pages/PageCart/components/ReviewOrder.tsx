@@ -21,10 +21,8 @@ export default function ReviewOrder({ address, items }: ReviewOrderProps) {
           <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
             Shipping
           </Typography>
-          <Typography gutterBottom>
-            {address.firstName} {address.lastName}
-          </Typography>
-          <Typography gutterBottom>{address.address}</Typography>
+          <Typography gutterBottom>{address.user_id}</Typography>
+          <Typography gutterBottom>{address.delivery.type}</Typography>
         </Grid>
         <Grid item container direction="column" xs={12} sm={6}>
           <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>

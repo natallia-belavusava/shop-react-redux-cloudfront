@@ -4,8 +4,9 @@ import { OrderStatus } from "~/constants/order";
 export const AddressSchema = Yup.object({
   firstName: Yup.string().required().default(""),
   lastName: Yup.string().required().default(""),
-  address: Yup.string().required().default(""),
-  comment: Yup.string().default(""),
+  delivery: Yup.string().required().default(""),
+  payment: Yup.string().required().default(""),
+  comment: Yup.string(),
 }).defined();
 
 export type Address = Yup.InferType<typeof AddressSchema>;
@@ -32,4 +33,24 @@ export const OrderSchema = Yup.object({
   statusHistory: Yup.array().of(statusHistorySchema).defined(),
 }).defined();
 
+export const OrderSchemaRDS = Yup.object({
+  delivery: Yup.object()
+    .shape({
+      type: Yup.string().required(),
+    })
+    .required(),
+  payment: Yup.object()
+    .shape({
+      type: Yup.string().required(),
+    })
+    .required(),
+  comments: Yup.string().optional(),
+  id: Yup.string().optional(),
+  status: Yup.string().optional(),
+  total: Yup.string().optional(),
+  items: Yup.array().optional(),
+  user_id: Yup.array().optional(),
+}).defined();
+
 export type Order = Yup.InferType<typeof OrderSchema>;
+export type OrderRDS = Yup.InferType<typeof OrderSchemaRDS>;
